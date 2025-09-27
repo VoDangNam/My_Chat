@@ -1,13 +1,38 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
 import Login from "./Login";
 import HomeAdmin from "./HomeAdmin";
 import Layout from "./components/Layout";
 import ChatView from "./views/ChatView";
 import ArchiveView from "./views/ArchiveView";
 
+// import thêm 3 trang bạn bè
+import SearchFriends from "./views/SearchFriends";
+import FriendRequests from "./views/FriendRequests";
+import FriendsList from "./views/FriendsList";
+
 function App() {
   const role = localStorage.getItem("role");
-  console.log("role: ", role);
+  const username = localStorage.getItem("username");
+
+  const [friends, setFriends] = useState([]);
+
+  // fetch danh sách bạn bè
+  const fetchFriends = async () => {
+    if (!username) return;
+    try {
+      const res = await axios.get(`http://localhost:8081/friends/${username}`);
+      setFriends(res.data);
+    } catch (error) {
+      console.error("Lỗi load friends:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFriends();
+  }, [username]);
 
   return (
     <BrowserRouter>
@@ -23,15 +48,26 @@ function App() {
           }
         />
 
-        {/* Route cho User (Layout) */}
+        {/* Route cho User (Layout chung) */}
         <Route
-          element={
-            role === "USER" ? <Layout /> : <Navigate to="/login" replace />
-          }
+          element={role === "USER" ? <Layout /> : <Navigate to="/login" replace />}
         >
+          {/* Chat */}
           <Route path="/chat" element={<ChatView />} />
           <Route path="/chat/:friendUsername" element={<ChatView />} />
           <Route path="/luu-tru" element={<ArchiveView />} />
+
+          {/* Các trang bạn bè */}
+          <Route path="/search-friends" element={<SearchFriends />} />
+          
+          {/* Truyền fetchFriends cho FriendRequests để update */}
+          <Route
+            path="/friend-requests"
+            element={<FriendRequests onAccept={fetchFriends} />}
+          />
+
+          {/* Truyền state friends cho FriendsList */}
+          <Route path="/friends" element={<FriendsList friends={friends} />} />
         </Route>
 
         {/* Trang mặc định (login) */}

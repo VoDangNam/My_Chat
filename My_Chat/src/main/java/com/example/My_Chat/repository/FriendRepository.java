@@ -9,7 +9,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface FriendRepository extends JpaRepository<Friend,Long> {
-    @Query("SELECT u FROM User u WHERE u.id IN (SELECT f.friendId FROM Friend f WHERE f.userId = :userId)")
+    @Query("SELECT u FROM User u WHERE u.id IN " +
+            "(SELECT f.friendId FROM Friend f WHERE f.userId = :userId AND f.status = 'accepted')")
     List<User> findFriendsByUserId(@Param("userId") Long userId);
 
+    List<Friend> findByUserIdAndStatus(Long userId, String status);
+    List<Friend> findByFriendIdAndStatus(Long friendId, String status);
+    Friend findByUserIdAndFriendId(Long userId, Long friendId);
 }

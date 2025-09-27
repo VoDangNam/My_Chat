@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { connectWebSocket, sendPrivateMessage } from "../socketService";
 import axios from "axios";
 
+
 export default function ChatView() {
   const { friendUsername } = useParams(); // lấy từ URL /chat/:friendUsername
   const username = localStorage.getItem("username"); // user hiện tại
